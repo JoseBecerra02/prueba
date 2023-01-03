@@ -4,7 +4,7 @@
 ; Natalia Andrea Marín Hernandez - 2041622
 ; Esteban Andres Hernandez - 2042817
 ; Juan Esteban Brand Tovar - 2043291
-; Link github: https://github.com/JoseBecerra02/Proyecto-final-FLP
+; Link github: https://github.com/JoseBecerra02/Taller3-FLP.git
 
 ;<programa> :=  <expresion>
 ;               un-programa (exp)
@@ -60,10 +60,12 @@
   '((program (expression) a-program)
     
     ;;Declarar variables y constantes
-    (expression ("var" (separated-list identifier "=" expression ",") "in" expression) variable-exp)
-    (expression ("const" (separated-list identifier "=" expression ",") "in" expression) constante-exp)
+    (expression ("var" (arbno (identifier "=" expression ",")) "in" expression) variable-exp)
+
+    (expression ("const" (arbno (identifier "=" expression ",")) "in" expression) constante-exp)
 
     
+
     ;;Identificador 
     (expression (identifier) var-exp)
 
@@ -71,49 +73,10 @@
     ;;Valores
     (expression (number) lit-exp)
     (expression (text) txt-exp)
-    
 
-    ;;Booleanos
-    (expression (expr-bool) boolean-exp)
-
-    (expr-bool (boolean) booleano)
-    (expr-bool (oper-un-bool "(" expression")") una-bool-exp)
-    (expr-bool (oper-bin-bool "(" expression "," expression")") bin-bool-exp)
-    (expr-bool (pred-prim "(" expression "," expression ")") pred-bool-exp)
-
-    (boolean ("true") true->boolean)
-    (boolean ("false") false->boolean)
-
-    (oper-un-bool ("not") not-bool-prim)
-
-    (oper-bin-bool ("or")  or-bool-prim)
-    (oper-bin-bool ("and") and-bool-prim)
-
-    (pred-prim ("<") less-prim)
-    (pred-prim (">") more-prim)
-    (pred-prim ("==") equal-prim)
-    (pred-prim ("<>") unequal-prim)
-    (pred-prim (">=") more-equal-prim)
-    (pred-prim ("<=") less-equal-prim)
-
-
-     ;;Lista
-    (expression ("[" (separated-list expression ",") "]") list-exp)
-
-
-    ;;Tupla
-    (expression ("tupla" "[" expression "," expression "]") tupla-exp)
-
-
-    ;;Registro
-    (expression ("{" (separated-list identifier "=" expression ",") "}")  registro-exp)
-
-
-    ;;Prima
     (expression ("(" expression primitive expression ")") primapp-bin-exp)
     (expression (primitive-un "(" expression ")") primapp-un-exp)
-
-    
+   
     ;;Primitivas aritmeticas para enteros
     (primitive ("+") primitiva-suma)
     (primitive ("~") primitiva-resta)
@@ -123,31 +86,27 @@
     ;;(primitive ("sub1") primitiva-sub1)
     
     (primitive ("concat") primitiva-concat)
-
     
     ;;Primitivas unitarias
     (primitive-un ("longitud") primitiva-longitud)
     (primitive-un ("add1") primitiva-add1)
     (primitive-un ("sub1") primitiva-sub1)
     (primitive-un ("cero") primitiva-cero)
-    
 
-    ;;Estructura begin
-    (expression ("begin" "{" expression (arbno "," expression) "}" "end")  begin-exp)
     
+    ;;Lista
+    (expression ("[" (separated-list expression ";") "]") list-exp)
+
     
-    ;;Estructura if 
+    ;;Características adicionales
     (expression ("if" expression "then" expression "[" "else" expression "]" "end") condicional-exp)
-    
-    
-    ;;Estructura while 
-    (expression ("while" expression "do" expression "done") while-exp)
-
-
 
     
+   
     ;;(expression ("declararRec" "(" (separated-list identifier "(" (separated-list identifier ",") ")" "=" expression ";") ")"  "{" expression "}")
                ;;recur-exp)
+
+    
 
     
     )
@@ -202,7 +161,7 @@
 ;     (empty-env))))
 (define init-env
   (lambda ()
-    (extend-env '(a) '(2)
+    (extend-env '() '()
      (empty-env)
      )
     )
@@ -221,35 +180,26 @@
       
       (txt-exp (text) (creacion-texto text env))
       (lit-exp (num) num)
-      
-      (boolean-exp (expres-bool) (creacion-bool expres-bool env))            
 
       (list-exp (list) (creacion-listas list env))
 
-      (tupla-exp (exp1 exp2) (creacion-tuplas exp1 exp2 env))
-
-      (registro-exp  (identificadores registros) (creacion-registros identificadores registros env))
-
-      (primapp-bin-exp (num1 prim num2) (apply-primitive prim (cons (eval-rand num1 env) (cons (eval-rand num2 env) '()))))
+      (primapp-bin-exp (num1 prim num2)
+                    (apply-primitive prim (cons (eval-rand num1 env) (cons (eval-rand num2 env) '()))))
       
-      (primapp-un-exp (prim num) (apply-primitive-un prim (eval-rand num env)))
+      (primapp-un-exp (prim num)
+                   (apply-primitive-un prim (eval-rand num env)))
       
-      (condicional-exp (test-exp true-exp false-exp) (creacion-if test-exp true-exp false-exp env))
-
-      (begin-exp (exp exps) (creacion-begin exp exps env))
-
-      (while-exp (exp-cond exp-do) (creacion-while exp-cond exp-do env))
+      (condicional-exp (test-exp true-exp false-exp)
+              (if (true-value? (eval-expression test-exp env))
+                  (eval-expression true-exp env)
+                  (eval-expression false-exp env)))
       
       ;;(recur-exp (procs idss bodies principalBody)
                  ;;(eval-expression principalBody
                               ;;(extend-env-recursively procs idss bodies env))
-
       )
-
     )
-
   )
-  
   
 ; funciones auxiliares para aplicar eval-expression a cada elemento de una 
 ; lista de operandos (expresiones)
@@ -369,11 +319,11 @@
 ; funciones auxiliares para encontrar la posición de un símbolo
 ; en la lista de símbolos de unambiente
 
-(define true?
-  (lambda (x)
-    (equal? x 'true)
+(define calcularHexa
+  (lambda (base Lista)
+    (Lista)
+    )
   )
-)
 
 (define creacion-variable
   (lambda (vars vals body env)
@@ -393,110 +343,22 @@
     )
   )
 
-
 (define creacion-listas
-  (lambda (expre env)
-    (cond
-      ((null? expre) empty)
-      (else
-       (cons (eval-expression (car expre) env) (creacion-listas (cdr expre) env))
-       )
-      )
-    )
+ (lambda (exprs env)
+  (cond
+   ((null? exprs) empty)
+   (else
+      (cons (eval-expression (car exprs) env) (creacion-listas (cdr exprs) env))
+   )
   )
+ )
+)
 
-
-(define creacion-tuplas
-  (lambda (expre1 expre2 env)
-    (cond
-      ((null? expre1) empty)
-      (else
-       (cons (eval-expression expre1 env) (eval-expression expre2 env))
-       )
-      )
-    )
-  )
-
-
-(define creacion-registros
-  (lambda (identi expre env)
-    (cond
-      ((null? expre) empty)
-      (else
-       (cons (append (list (car identi) '=) (cons (eval-expression (car expre) env) empty)) (creacion-registros (cdr identi) (cdr expre) env))
-       )
-      )
-    )
-  )
-
-
-(define creacion-bool
-  (lambda (expression env)
-    (cases  expr-bool expression
-      (booleano (bool)
-                (cases boolean bool
-                  (true->boolean () 'true)
-                  (false->boolean () 'false)
-                  )
-                )
-      (una-bool-exp (unary-prim bool-exp)
-                    (cases oper-un-bool unary-prim
-                      (not-bool-prim () (if (true? (eval-expression bool-exp env)) 'false 'true))
-                      )
-                    )
-      (bin-bool-exp (pred first-expr second-expr)
-                    (cases oper-bin-bool pred
-                      (and-bool-prim () (if (and (true? (eval-expression first-expr env)) (true? (eval-expression second-expr env))) 'true 'false))
-                      (or-bool-prim () (if (or  (true? (eval-expression first-expr env)) (true? (eval-expression second-expr env))) 'true 'false))
-                      )
-                    )
-      (pred-bool-exp (pred first-expr second-expr)
-                     (cases pred-prim pred
-                       (less-prim () (if (< (eval-expression first-expr env) (eval-expression second-expr env)) 'true 'false))
-                       (more-prim () (if (> (eval-expression first-expr env) (eval-expression second-expr env)) 'true 'false))
-                       (equal-prim () (if (equal? (eval-expression first-expr env) (eval-expression second-expr env)) 'true 'false))
-                       (unequal-prim () (if (not (equal? (eval-expression first-expr env) (eval-expression second-expr env))) 'true 'false))
-                       (more-equal-prim () (if (>= (eval-expression first-expr env) (eval-expression second-expr env)) 'true 'false))
-                       (less-equal-prim () (if (<= (eval-expression first-expr env) (eval-expression second-expr env)) 'true 'false))
-                       )
-                     )
-      )
-    )
-  )                                                                
-
-
-(define creacion-begin
-  (lambda (exp exps env)
-     (if (null? exps) (eval-expression exp env) (begin (eval-expression exp env) (creacion-begin (car exps) (cdr exps) env)))
-    )
-  )
-
-
-(define creacion-if
-  (lambda (test-exp true-exp false-exp env)
-    (if (true? (eval-expression test-exp env)) (eval-expression true-exp env) (eval-expression false-exp env))
-    )
-  )
-
-(define creacion-while
-  (lambda (exp-cond exp-do env)
-    (if (true? (eval-expression exp-cond env)) (begin (eval-expression exp-do env) (creacion-while exp-cond exp-do env)) 'done)
-    )
-  )
-
-(define creacion-for
-  (lambda (test-exp true-exp false-exp env)
-    (if (true? (eval-expression test-exp env)) (eval-expression true-exp env) (eval-expression false-exp env))
-    )
-  )
-
-
-
+                                                                   
+  
 (define list-find-position
   (lambda (sym los)
-    (list-index (lambda (sym1) (eqv? sym1 sym)) los)
-    )
-  )
+    (list-index (lambda (sym1) (eqv? sym1 sym)) los)))
 
 (define list-index
   (lambda (pred ls)
@@ -506,9 +368,6 @@
       (else (let ((list-index-r (list-index pred (cdr ls))))
               (if (number? list-index-r)
                 (+ list-index-r 1)
-                #f)))
-      )
-    )
-  )
+                #f))))))
 
 (interpretador)
